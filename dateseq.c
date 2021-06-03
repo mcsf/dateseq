@@ -3,23 +3,10 @@
 #include <time.h>
 
 #define ERR(args...)	{fprintf(stderr, args); fprintf(stderr, "\n"); usage(); exit(1);}
-#define LENGTH(x)	(sizeof x / sizeof x[0])
 
 #define DATEFMT	"%Y-%m-%d"
 #define DATELEN	11
 #define DAY	24 * 3600
-
-struct unit {
-	char prefix;
-	int seconds;
-};
-
-static struct unit units[] = {
-	{ 'd',   1 * DAY },
-	{ 'w',   7 * DAY },
-	{ 'm',  30 * DAY },
-	{ 'y', 365 * DAY },
-};
 
 static char *name; // Program name, i.e. argv[0]
 
@@ -75,9 +62,11 @@ void usage() {
 }
 
 int prefix2seconds(char prefix) {
-	for (int i = 0; i < LENGTH(units); i++) {
-		struct unit u = units[i];
-		if (u.prefix == prefix) return u.seconds;
+	switch (prefix) {
+		case 'd': return   1 * DAY;
+		case 'w': return   7 * DAY;
+		case 'm': return  30 * DAY;
+		case 'y': return 365 * DAY;
 	}
 	return 0;
 }

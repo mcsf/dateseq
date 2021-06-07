@@ -13,6 +13,7 @@ static char *name; // Program name, i.e. argv[0]
 void usage();
 int prefix2seconds(char prefix);
 time_t parse_date(char *input);
+void print_date(time_t date);
 
 int main(int argc, char **argv) {
 	name = argv[0];
@@ -20,10 +21,14 @@ int main(int argc, char **argv) {
 	time_t iter_date;
 	time_t end_date;
 	switch (argc) {
-		case 2:
-			iter_date = parse_date(argv[1]);
+		case 2: {
+			time_t date = parse_date(argv[1]);
+			time(&iter_date);
 			time(&end_date);
+			if (date < end_date) iter_date = date;
+			else end_date = date;
 			break;
+			}
 		case 3:
 			iter_date = parse_date(argv[1]);
 			end_date = parse_date(argv[2]);
@@ -33,26 +38,21 @@ int main(int argc, char **argv) {
 			return 1;
 	}
 
-	if (iter_date > end_date) {
-		time_t tmp = iter_date;
-		iter_date = end_date;
-		end_date = tmp;
+	if (iter_date < end_date) {
+		for (; iter_date < end_date; iter_date += DAY)
+			print_date(iter_date);
+	} else {
+		for (; end_date < iter_date; iter_date -= DAY)
+			print_date(iter_date);
 	}
 
-	for (; iter_date < end_date; iter_date += DAY) {
-		struct tm tm;
-		char formatted[DATELEN];
-		localtime_r(&iter_date, &tm);
-		strftime(formatted, DATELEN, DATEFMT, &tm);
-		printf("%s\n", formatted);
-	}
 }
 
 void usage() {
 	fprintf(stderr, "Usage:\t%s 2021-05-29\n", name);
 	fprintf(stderr, "      \t%s -2d\n", name);
 	fprintf(stderr, "      \t%s +2w\n", name);
-	fprintf(stderr, "      \t%s 2021-06-05 2021-06-10\n", name);
+	fprintf(stderr, "      \t%s 2021-06-10 2021-06-05\n", name);
 	fprintf(stderr, "\nSupported relative units: d, w, m, y.\n");
 	exit(1);
 }
@@ -89,6 +89,14 @@ time_t parse_date(char *input) {
 	}
 
 	return date;
+}
+
+void print_date(time_t date) {
+	struct tm tm;
+	char formatted[DATELEN];
+	localtime_r(&date, &tm);
+	strftime(formatted, DATELEN, DATEFMT, &tm);
+	puts(formatted);
 }
 
 /* vim: set ts=8: */

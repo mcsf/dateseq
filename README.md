@@ -35,6 +35,16 @@ dateseq +1w
 2021-06-09
 ```
 
+Sequence between two dates, including backwards:
+
+```
+dateseq 2021-06-03 2021-05-30
+2021-06-03
+2021-06-02
+2021-06-01
+2021-05-31
+```
+
 ## Install
 
 * Compile with `make`.
